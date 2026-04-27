@@ -1,17 +1,15 @@
-# Use "databases" for the Postgres instance
 databases:
   - name: playtopay_db
     plan: free
 
 services:
-  # 1. Django Backend
   - type: web
     name: playtopay-backend
     plan: free
     runtime: python
-    buildCommand: ./backend/build.sh
-    # We run the API and the Worker together to maximize the Free Tier
-    startCommand: "gunicorn playtopay.wsgi:application & python manage.py qcluster"
+    rootDir: backend
+    buildCommand: ./build.sh
+    startCommand: gunicorn playtopay.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -21,14 +19,5 @@ services:
         generateValue: true
       - key: PYTHON_VERSION
         value: "3.11"
-
-  # 2. React Frontend
-  - type: static
-    name: playtopay-frontend
-    plan: free
-    buildCommand: cd frontend && npm install && npm run build
-    publishPath: frontend/dist
-    envVars:
-      - key: VITE_API_BASE
-        # Replace this with your actual backend URL after the first deploy
-        value: https://playtopay-backend.onrender.com/api/v1
+      - key: DJANGO_SETTINGS_MODULE
+        value: playtopay.settings
