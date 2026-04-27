@@ -22,7 +22,7 @@ load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = [os.environ.get("RENDER_EXTERNAL_HOSTNAME", "localhost"), "127.0.0.1", "playtopay-backend.onrender.com"]
 
@@ -64,7 +64,7 @@ ROOT_URLCONF = "playtopay.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "staticfiles"],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -93,13 +93,13 @@ DATABASES = {
 # CORS
 # ---------------------------------------------------------------------------
 
-CORS_ALLOW_ALL_ORIGINS = True # Allow all origins for the interview demo
+# CORS_ALLOW_ALL_ORIGINS = True # Allow all origins for the interview demo
 
 # If you prefer to be strict, you can use:
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173",
-#     os.environ.get("FRONTEND_URL", "https://playtopay-frontend.onrender.com"),
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://playtopay-ledger-engine.vercel.app"
+]
 
 CORS_ALLOW_HEADERS = [
     "accept",
