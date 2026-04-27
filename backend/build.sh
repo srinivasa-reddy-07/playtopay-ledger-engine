@@ -20,3 +20,5 @@ python manage.py collectstatic --no-input
 
 echo ">>> Running migrations..."
 python manage.py migrate
+
+python manage.py seed_merchants

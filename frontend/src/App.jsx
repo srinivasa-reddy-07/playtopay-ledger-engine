@@ -601,7 +601,7 @@ export default function App() {
                 <IndianRupee className="w-4 h-4 text-white" />
               </div>
               <div>
-                <span className="text-white font-bold text-base tracking-tight">MerchantPay</span>
+                <span className="text-white font-bold text-base tracking-tight">PlaytoPay Ledger</span>
                 <span className="hidden sm:inline text-slate-600 text-sm ml-2 font-normal">Dashboard</span>
               </div>
             </div>

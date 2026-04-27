@@ -82,9 +82,17 @@ WSGI_APPLICATION = "playtopay.wsgi.application"
 # Database — PostgreSQL (credentials from .env)
 # ---------------------------------------------------------------------------
 
+DB_USER = os.environ.get("DB_USER", "postgres")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_PORT = os.environ.get("DB_PORT", "5432")
+DB_NAME = os.environ.get("DB_NAME", "playtopay_db")
+
+default_db_url = f"postgres://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL", "postgres://postgres:@localhost:5432/playtopay_db"),
+        default=os.environ.get("DATABASE_URL", default_db_url),
         conn_max_age=600
     )
 }
@@ -94,6 +102,9 @@ DATABASES = {
 # ---------------------------------------------------------------------------
 
 # CORS_ALLOW_ALL_ORIGINS = True # Allow all origins for the interview demo
+CSRF_TRUSTED_ORIGINS = [
+    "https://playtopay-ledger-engine.vercel.app"
+]
 
 # If you prefer to be strict, you can use:
 CORS_ALLOWED_ORIGINS = [
