@@ -1,0 +1,36 @@
+services:
+  # 1. PostgreSQL Database (Free Tier)
+  - type: database
+    name: playtopay_db
+    plan: free
+
+  # 2. Django Backend
+  - type: web
+    name: playtopay-backend
+    plan: free
+    runtime: python
+    buildCommand: ./backend/build.sh
+    # TRICK: Run both server and worker in one process to stay on free tier
+    startCommand: "gunicorn playtopay.wsgi:application & python manage.py qcluster"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: playtopay_db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: "4"
+      - key: PYTHON_VERSION
+        value: "3.11"
+
+  # 3. React Frontend
+  - type: web
+    name: playtopay-frontend
+    plan: free
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/dist
+    envVars:
+      - key: VITE_API_BASE
+        value: https://playtopay-backend.onrender.com/api/v1

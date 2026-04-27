@@ -352,7 +352,7 @@ import {
   X,
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8000/api/v1';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api/v1';
 
 const formatINR = (paise) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(paise / 100);

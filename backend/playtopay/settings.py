@@ -5,6 +5,7 @@ Django settings for playtopay project.
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
 
 # ---------------------------------------------------------------------------
 # Paths & environment
@@ -23,7 +24,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [os.environ.get("RENDER_EXTERNAL_HOSTNAME", "localhost"), "127.0.0.1", "playtopay-backend.onrender.com"]
 
 # ---------------------------------------------------------------------------
 # Application definition
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     # CorsMiddleware MUST come before CommonMiddleware
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Add WhiteNoise
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -81,23 +83,23 @@ WSGI_APPLICATION = "playtopay.wsgi.application"
 # ---------------------------------------------------------------------------
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", "playtopay_db"),
-        "USER": os.environ.get("DB_USER", "postgres"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
-    }
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL", "postgres://postgres:@localhost:5432/playtopay_db"),
+        conn_max_age=600
+    )
 }
 
 # ---------------------------------------------------------------------------
 # CORS
 # ---------------------------------------------------------------------------
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
+CORS_ALLOW_ALL_ORIGINS = True # Allow all origins for the interview demo
+
+# If you prefer to be strict, you can use:
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",
+#     os.environ.get("FRONTEND_URL", "https://playtopay-frontend.onrender.com"),
+# ]
 
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -137,6 +139,12 @@ USE_TZ = True
 # ---------------------------------------------------------------------------
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS = [f'https://{RENDER_EXTERNAL_HOSTNAME}']
 
 # ---------------------------------------------------------------------------
 # Default primary key field type
