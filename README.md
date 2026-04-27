@@ -276,6 +276,42 @@ python manage.py seed_merchants
 
 ---
 
+## ⚠️ Live Demo: Render Free Tier
+
+This project is hosted on **Render's Free Instance**. To save resources, the server automatically "spins down" after 15 minutes of inactivity.
+
+### The "Cold Start"
+
+If the app hasn't been visited recently, it may take **30–60 seconds to wake up**.
+
+**What to expect:** You might see a "Backend Unavailable" message on the initial load. Please **wait about a minute and refresh the page**. Once the server is awake, the ledger and background workers will process requests instantly.
+
+### Verification
+
+You can verify the backend is active by visiting:
+```
+https://playtopay-backend.onrender.com/api/v1/dashboard/
+```
+
+If you see JSON data, the engine is fully operational.
+
+---
+
+## System Health
+
+### Checking Background Worker Status
+
+To verify the background worker is running, monitor any payout in the dashboard:
+
+1. Initiate a test payout from the React frontend
+2. Check the payout status in the ledger
+3. **If status changes from `PENDING` → `PROCESSING` → `COMPLETED` within 60 seconds**, the worker is healthy
+4. **If status stays `PENDING` for more than 60 seconds**, the worker process is still initializing (typical on cold start)
+
+Once the server wakes up, payouts process in milliseconds.
+
+---
+
 ## License
 
 Proprietary — PlayToPay Financial Ledger System

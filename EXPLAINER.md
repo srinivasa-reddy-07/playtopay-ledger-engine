@@ -106,3 +106,50 @@ if merchant.balance >= requested_amount: # Dangerous!
 ### What I replaced it with
 
 I completely ripped that out. I enforced the **`BigIntegerField` paise format**, removed the **static balance column entirely**, and wrote the **database-level `.select_for_update()` lock** and **dynamic `.aggregate()` sum query** shown in Section 1 and 2.
+
+---
+
+## 6. Infrastructure & Deployment Strategy
+
+### Distributed Architecture
+
+The system is split across **Vercel (Frontend)** and **Render (Backend/DB)** to leverage specialized hosting for static vs. dynamic assets:
+
+- **Vercel** handles React frontend deployment with global CDN and instant cold-start
+- **Render** hosts the Django backend, PostgreSQL database, and background worker on a single instance
+
+### Infrastructure as Code (IaC)
+
+Deployment is managed via **`render.yaml`**. This blueprint automates the provisioning of:
+
+- PostgreSQL instance with persistent data volume
+- Web Service linked to the database
+- Environment variable injection for secrets and configuration
+
+This ensures a **reproducible production environment** without manual server configuration.
+
+### Process Chaining (Sidecar Pattern)
+
+To maintain the ledger's high-concurrency requirements on a single free-tier instance, I chained the web server and the task worker in the startup command:
+
+```bash
+gunicorn playtopay.wsgi:application & python manage.py qcluster
+```
+
+**Why this matters:** This ensures the **Django-Q2 cluster is always alive** to process the payout queue the moment a request is recorded in the ledger. Without this, payouts could sit indefinitely waiting for a worker that doesn't exist.
+
+### Security Handshake
+
+Configured **`CSRF_TRUSTED_ORIGINS`** and **`CORS_ALLOWED_ORIGINS`** specifically for the Vercel production domain. This allows secure, state-changing financial requests across different cloud providers while blocking unauthorized cross-origin requests.
+
+```python
+CSRF_TRUSTED_ORIGINS = [
+    "https://playtopay.vercel.app"
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://playtopay.vercel.app"
+]
+```
+
+This is critical for a financial system: we accept requests **only** from our trusted frontend, and the browser's CSRF protection prevents token hijacking attacks.
